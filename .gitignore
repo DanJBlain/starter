@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+*.env
+
+# Build output
+build/
+dist/
+
+# Precede by exclamation for exceptions, e.g. !this.env will ensure the file this.env is tracked even when other *.env files are not
+# Use "git rm --cached filename" to stop tracking a file after git has already begun tracking it. Inclusion in .gitignore is insufficient
