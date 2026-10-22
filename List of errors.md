@@ -1,3 +1,5 @@
+WARNING - THIS LIST OF ERRORS WAS PORTED FROM THE REPOSITORY "testStarter" MOSTLY UNEDITED. It needs to be updated for all the changes I've made while fleshing out the testStarter prototype. I may eventually delete testStarter, since this starter prototype has become a functional
+
 List of errors to be flagged by the ancestor (default) ProjectPaths object:
 
 * Missing data structure: projectConfig
