@@ -32,12 +32,11 @@ It has the following expectations:
     width="200px"
     alt="Diagram illustrating the project">
 
-<!-- A link to another page on the site -->
-<!-- (Not required for external links, since these will invariably be absolutely addressed) -->
+<!-- A link to another page on the site
+     (Not required for external links, since these will invariably be absolutely addressed) -->
 <a  href="./about.html"
     data-airlock="./about.html">
-    About
-</a>
+    About</a>
   ```
 
 The purpose of using the extra data- attribute (which you can rename per project, as desired) in addition to the src/href attribute is to ensure a build tool can freely update the link (for minification or what have you), but if you're not using a build tool, the original src/href attribute properly maintains the link or resource so your website still functions
