@@ -1,7 +1,7 @@
 # starter
 This repo is meant to be cloned for new website projects, to ease eventual linkage to my portfolio
 
-Less succinctly, but more informatively, I've had trouble in the past where I attempt to display my projects on my Portfolio page, by simply moving the individual project folder to a sub-folder on my Portfolio site and just linking over with an <a> tag to the project's index.html file. It has NOT worked cleanly, because each of the projects have tended to be built assuming they are on the root. Therefore, much more effort has been required to assimilate any projects into my portfolio site.
+Less succinctly, but more informatively, I've had trouble in the past where I attempt to display my projects on my Portfolio page, by simply moving the individual project folder to a sub-folder on my Portfolio site and just linking over with an <a> tag to the project's index.html file. It has NOT worked cleanly, because each of the projects have tended to be built assuming they are on the root. Therefore, much more effort has been required to assimilate any projects into my portfolio site
 
 This starter project is meant to put a stop to these difficulties. It can act as the basis for any new project, and already contains functionality to allow me to assimilate the project into my Portfolio, or place it at the root, or place it anywhere, with no more effort than, as suggested: sticking it into a folder and changing a certain link in the index.html file. Due to the flexibility of this approach, the starter can itself act as the basis for the new Portfolio site, too
 
@@ -39,4 +39,4 @@ It has the following expectations:
 </a>
 ```
 
-The purpose of using the extra data- attribute (which you can rename per project, as desired) in addition to the src/href attribute is to ensure a build tool can freely update the link (for minification or what have you), but if you're not using a build tool, the original src/href attribute properly maintains the link or resource so your website still functions.
+The purpose of using the extra data- attribute (which you can rename per project, as desired) in addition to the src/href attribute is to ensure a build tool can freely update the link (for minification or what have you), but if you're not using a build tool, the original src/href attribute properly maintains the link or resource so your website still functions
