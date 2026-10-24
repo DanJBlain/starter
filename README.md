@@ -32,7 +32,8 @@ It has the following expectations:
     width="200px"
     alt="Diagram illustrating the project">
 
-<!-- A link to another page -->
+<!-- A link to another page on the site -->
+<!-- (Not required for external links, since these will invariably be absolutely addressed) -->
 <a  href="./about.html"
     data-airlock="./about.html">
     About
