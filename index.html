@@ -5,26 +5,32 @@
     <meta charset="utf-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1">
-
+    
     <title>My Project</title>
-    <script type="module">
-        import {
-            initializeProjectPaths
-        } from "./scripts/project-config.js";
 
-        initializeProjectPaths(import.meta.url);
+    <!-- Synchronously enable the project airlock -->
+    <script src="./scripts/airlock-engine.js"></script>
+    <script>
+        new AirlockEngine({ 
+            debug: true,
+            attribute: 'data-airlock' // Can be customized per project if desired
+        }).start();
     </script>
-    <link rel="stylesheet" data-project-file="stylesheets:main.css">
+    
+    <!-- Link to external files -->
+    <link rel="stylesheet" src="./stylesheets/main.css" data-airlock="./stylesheets/main.css">
 </head>
 <body>
     <h1>My Project</h1>
 
-    <img data-project-file="images:diagram.png" width="200px"
+    <img src="./stylesheets/diagram.png"
+        data-airlock="./stylesheets/diagram.png"
+        width="200px"
         alt="Diagram illustrating the project">
 
     <p>
-        <a data-project-file="about.html">
-            Introduces relative linking, shouldn't be included in the final project except for unusual links
+        <a href="./about.html" data-airlock="./about.html">
+            Introduces safe linking
         </a>
     </p>
 </body>
