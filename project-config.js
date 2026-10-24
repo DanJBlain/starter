@@ -1,142 +1,110 @@
-/* scripts/project-config.js */
-
-
-export class ProjectConfig {
-    // Base project folder
-    #root = new URL("../", import.meta.url);
-
-    // Base folders present in all Starter projects
-    #folders = {
-        root: "",
-        images: "images",
-        scripts: "scripts",
-        stylesheets: "stylesheets"
-    };
-
-    // Construct the configuration object
-    constructor(root, folderList) {
-        this.#root = root;
-        this.#folders = {
-            ...this.#folders,
-            ...folderList
+// airlock-engine.js
+//
+class AirlockEngine {
+    constructor(config = {}) {
+        // Merge user configurations with sensible defaults
+        this.config = {
+            attribute: 'data-project-file',
+            debug: false,
+            ...config
         };
-    }
-
-    // Construct a URL for a file in one of the standard folders
-    folder(category, filename) {
-        if (category === "") {category="root";}
-
-        const folder = this.#folders[category];
-
-        if (folder === undefined) {throw new Error(`Unknown project folder: ${category}`);}
-
-        const directory = folder
-            ? new URL(`${folder}/`, this.#root)
-            : this.#root;
-
-        return new URL(filename, directory).href;
-    }
-
-    // Construct a URL for a file at the project root
-    root(filename = "") {
-        return new URL(filename, this.#root).href;
-    }
-
-    // Construct the URL of the site home
-    static home() {
-        return new URL("../", import.meta.url).href;
-    }
-}
-
-
-// Parse the calling HTML file to link the project's folders
-export function initializeProjectPaths(projectRoot, folderList = {}) {
-
-    // Ensure it's a function (classes are functions under the hood)
-    const projectConfig = new ProjectConfig(projectRoot, folderList);
-    
-    document.querySelectorAll("[data-project-file]")
-        .forEach(element => {
-            const specification = element.dataset.projectFile;
-            const separator = specification.indexOf(":");
-            const category = (separator === -1) ? "" : specification.slice(0, separator);
-            const filename = specification.slice(separator + 1);
-            const url = projectConfig.folder(category, filename);
-
-            if (element instanceof HTMLLinkElement) {
-                element.href = url;
-            } else if (element instanceof HTMLImageElement) {
-                element.src = url;
-            } else if (element instanceof HTMLAnchorElement) {
-                element.href = url;
-            }
-        });
-}
-
-
-// Parse the calling HTML file to link the project's folders
-export function applyProjectPaths(projectConfig) {
-    if (!(projectConfig instanceof ProjectConfig)) {
-        throw new TypeError(
-            "applyProjectPaths failed: expected an instantiated ProjectConfig object"
-        );
-    }
-
-    document.querySelectorAll("[data-project-file]")
-        .forEach(element => {
-            const specification = element.dataset.projectFile;
-            const separator = specification.indexOf(":");
-
-            const category = (separator === -1)
-                ? ""
-                : specification.slice(0, separator);
-
-            const filename = (separator === -1)
-                ? specification
-                : specification.slice(separator + 1);
-
-            const url = projectConfig.folder(category, filename);
-
-            if (
-                element instanceof HTMLLinkElement ||
-                element instanceof HTMLAnchorElement
-            ) {
-                element.href = url;
-            } else if (element instanceof HTMLImageElement) {
-                element.src = url;
-            }
-        });
-}
-
-/**
- * Sample instantiation of the ProjectConfig class
- * Generally you won't do this without adding new folders, since the "import" call will
- * by itself contain functionality for the {scripts, stylesheets, images} folders.
-
-// For a more complicated project configuration, import the project-config.js object from host/scripts to host/projects/myProject/scripts/project-config.js
-import { projectConfig } from "../../../scripts/project-config.js";
-
-const myProjectConfig extends ProjectConfig {
-    // Construct the configuration object
-    constructor(folderList=this.#folders) {
-        this.#folders = {
-            ...super.folders,
-            ...folderList
+        
+        // Calculate the absolute anchor based on where THIS script file is hosted,
+        // or fallback to the current page folder.
+        const currentScriptSrc = document.currentScript ? document.currentScript.src : '';
+        const scriptUrl = currentScriptSrc.length > 0 ? currentScriptSrc : window.location.href;
+        
+        this.baseUrl = new URL('.', scriptUrl).href;
+        
+        if (this.config.debug) {
+            console.log(`%c[Airlock] Initialized at: ${this.baseUrl}`, 'color: #00bcd4; font-weight: bold;');
         }
     }
-);
+    
+    // Starts the global watch engine
+    start() {
+        const attr = this.config.attribute;
 
-config = new myProjectConfig({
-        sounds: "WAVs",
-        php: "scripts/php"
-    });
+        // Core element router
+        const resolveElement = (el) => {
+            const airlockPath = el.getAttribute(attr);
+            if (!airlockPath) return;
+            
+            let attrName = 'href';
+            if (['IMG', 'SCRIPT', 'AUDIO', 'VIDEO', 'IFRAME'].includes(el.tagName)) {
+                attrName = 'src';
+            }
+            
+            const currentAttrValue = el.getAttribute(attrName);
+            
+            // 🛑 FRAMEWORK GUARD
+            // If the current attribute doesn't match our raw path, a bundler has taken over.
+            if (currentAttrValue && currentAttrValue !== airlockPath) {
+                if (this.config.debug) {
+                    console.log(
+                        `%c[Airlock] Framework detected for <${el.tagName.toLowerCase()}> (${airlockPath}). Stepping aside.`, 
+                        'color: #ff9800; font-style: italic;'
+                    );
+                }
+                el.removeAttribute(attr);
+                return;
+            }
+            
+            // 🟢 VANILLA ROUTER
+            const absoluteUrl = new URL(airlockPath, this.baseUrl).href;
+            
+            if (this.config.debug) {
+                console.log(`[Airlock] Resolved <${el.tagName.toLowerCase()}>: ${airlockPath} ➡️ ${absoluteUrl}`);
+            }
+            
+            el.setAttribute(attrName, absoluteUrl);
+            el.removeAttribute(attr);
+        };
+        
+        const scanTree = (targetNode) => {
+            if (!targetNode || targetNode.nodeType !== Node.ELEMENT_NODE) return;
+            if (targetNode.hasAttribute(attr)) resolveElement(targetNode);
+            targetNode.querySelectorAll(`[${attr}]`).forEach(resolveElement);
+        };
+        
+        // Instantiate MutationObserver
+        this.observer = new MutationObserver((mutations) => {
+            for (let i = 0; i < mutations.length; i++) {
+                const addedNodes = mutations[i].addedNodes;
+                for (let j = 0; j < addedNodes.length; j++) {
+                    scanTree(addedNodes[j]);
+                }
+            }
+        });
+        
+        // Start streaming interception immediately
+        this.observer.observe(document.documentElement, { childList: true, subtree: true });
+        
+        // Safety fallback sync
+        scanTree(document.documentElement);
+    }
+}
 
-// Instead of extending, you may call the initializeProjectPaths() method from a script block of the HTML index.html file
-    <script type="module">
-        import {
-            initializeProjectPaths
-        } from "./scripts/project-config.js";
+// Attach it to the window object so our HTML bootloader can see it instantly
+window.AirlockEngine = AirlockEngine;
 
-        initializeProjectPaths({});
+/**
+ * Sample instantiation of the AirlockEngine class in the HTML file
+
+<head>
+    <!-- Other tags in the head element -->
+
+    <!-- Update with actual location of this script on the website -->
+    <script src="../scripts/airlock-engine.js"></script>
+    
+    <script>
+        new AirlockEngine({ 
+            debug: true,
+            attribute: 'data-project-file' // Can be customized per project if desired
+        }).start();
     </script>
+
+    <!-- Other tags in the head element -->
+</head>
+
 */
